@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  fastapi:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.dev
+    volumes:
+      - ..:/app
+    environment:
+      DB_DRIVER: mysql+pymysql
+      DB_USER: app_user
+      DB_PASSWORD: app_pass
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_NAME: rag_db
+      DB_CHARSET: utf8mb4
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "pip install -r /app/requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: rag_db
+      MARIADB_USER: app_user
+      MARIADB_PASSWORD: app_pass
+      MARIADB_ROOT_PASSWORD: root_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../db_data:/var/lib/mysql
+      - ./conf.d:/etc/mysql/conf.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20

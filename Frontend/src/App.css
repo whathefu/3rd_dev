@@ -1,0 +1,54 @@
+:root {
+  --bg: #f6f8fb;
+  --line: #e6e8ee;
+  --text: #0f172a;
+  --blue: #2563ff;
+  --shadow: 0 8px 28px rgba(15,23,42,.06);
+  
+  /* 모바일 웹 표준 여백 시스템 */
+  --safe-area: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  --container-padding: 16px;
+  --section-gap: 24px;
+  --card-gap: 16px;
+  --border-radius: 16px;
+  --button-height: 48px;
+  --icon-size: 24px;
+}
+
+.App {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.main-content {
+  flex: 1;
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --container-padding: 16px;
+    --section-gap: 20px;
+    --card-gap: 12px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  :root {
+    --container-padding: 24px;
+    --section-gap: 32px;
+    --card-gap: 20px;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    --container-padding: 32px;
+    --section-gap: 40px;
+    --card-gap: 24px;
+  }
+}

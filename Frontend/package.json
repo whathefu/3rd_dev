@@ -1,0 +1,23 @@
+{
+  "name": "ai-go-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.1",
+    "axios": "^1.6.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.0",
+    "react-router-dom": "^7.8.2",
+    "web-vitals": "^3.5.2"
+  },
+  "scripts": {
+    "dev": "vite --port 3005 --open",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^7.1.3"
+  }
+}

@@ -1,0 +1,27 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Environment
+.venv/
+env/
+ENV/
+python/
+*.env
+
+# Editor
+.vscode/
+
+# DB data
+db_data/
+*.sqlite
+*.db
+
+# Uploads
+*.mp4
+*.webm
+uploaded_videos/
+
+# OS files
+.DS_Store
+Thumbs.db

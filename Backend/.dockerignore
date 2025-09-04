@@ -1,0 +1,30 @@
+# 가상환경 및 캐시
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+
+# 운영체제 및 에디터 파일
+*.DS_Store
+*.swp
+*.swo
+*.bak
+*.log
+*.tmp
+
+# 불필요한 대용량 데이터
+uploaded_videos/
+*.mp4
+*.avi
+*.mkv
+
+# DB 관련 로컬 저장소
+db_data/
+data/mariadb/
+data/video/
+
+# Git 관련
+.git/
+.gitignore

@@ -1,0 +1,29 @@
+@base = http://localhost:8000
+@content = application/json
+@level = easy
+@maxItems = 5
+
+### 1) health
+GET {{base}}/health
+
+### 2) login (기존 계정 사용)
+# @name login
+POST {{base}}/api/v1/users/login
+Content-Type: {{content}}
+
+{ "email": "tester@test.com", "password": "1234" }
+
+### 3) set token
+@token = {{login.response.body.$.accessToken}}
+
+### 4) create session
+# @name createSession
+POST {{base}}/api/v1/quiz-sessions
+Authorization: Bearer {{token}}
+Content-Type: {{content}}
+
+{ "level": "{{level}}", "maxItems": {{maxItems}} }
+
+### 5) current
+GET {{base}}/api/v1/quiz-sessions/{{createSession.response.body.$.sessionId}}/current
+Authorization: Bearer {{token}}

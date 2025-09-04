@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+# 시스템 의존성 (MariaDB 클라이언트 등)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /code
+
+# 캐시 살리기용: 먼저 requirements
+COPY requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir -r /code/requirements.txt
+
+# 앱 코드
+COPY . /code
+
+# (옵션) uvicorn 실행은 compose에서 command로 지정
+EXPOSE 8000

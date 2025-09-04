@@ -1,0 +1,72 @@
+# docker-compose.yml
+name: ai-go
+
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: ai_go_mariadb_new
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-ai_go}
+      MARIADB_USER: ${MARIADB_USER:-app_user}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-app_pass}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_pass}
+      TZ: ${TZ:-Asia/Seoul}
+    ports:
+      - "${DB_PORT_PUBLIC:-3306}:3306"
+    volumes:
+      # EC2 배포 시 바인드로 교체 권장: /home/ubuntu/db_data:/var/lib/mysql
+      - db_data_new:/var/lib/mysql
+      - ./docker/conf.d:/etc/mysql/conf.d:ro
+    healthcheck:
+      # MariaDB 공식 이미지에는 'mariadb' CLI가 포함되어 있습니다.
+      test: ["CMD-SHELL", "mariadb -uroot -p${MARIADB_ROOT_PASSWORD:-root_pass} -e 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - ai_go_network
+    profiles: ["db", "app"]
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: ai_go_fastapi_new
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    environment:
+      DB_DRIVER: ${DB_DRIVER:-mysql+pymysql}
+      DB_USER: ${MARIADB_USER:-app_user}
+      DB_PASSWORD: ${MARIADB_PASSWORD:-app_pass}
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_NAME: ${MARIADB_DATABASE:-ai_go}
+      DB_CHARSET: ${DB_CHARSET:-utf8mb4}
+      TZ: ${TZ:-Asia/Seoul}
+      CREATE_TABLE_ON_START: ${CREATE_TABLE_ON_START:-false}
+    ports:
+      - "${API_PORT_PUBLIC:-8000}:8000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    command: >
+      sh -c '
+        pip install -r /app/requirements.txt &&
+        if [ "$CREATE_TABLE_ON_START" = "true" ]; then
+          python -m app.schemas.create_table;
+        fi &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      '
+    networks:
+      - ai_go_network
+    profiles: ["app"]
+
+volumes:
+  db_data_new:
+
+networks:
+  ai_go_network:
+    driver: bridge

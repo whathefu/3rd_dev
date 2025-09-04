@@ -1,0 +1,604 @@
+:root {
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --blue: #246bff;
+  --blue-700: #1e5af2;
+  --blue-050: #eef4ff;
+  --green: #10b981;
+  --orange: #f97316;
+  --line: #e6e8ee;
+  --chip: #eef2ff;
+  --radius-xl: 16px;
+  --radius-2xl: 22px;
+  --shadow: 0 6px 24px rgba(15,23,42,0.06);
+  --focus: 0 0 0 3px rgba(36,107,255,.18);
+  
+  /* 모바일 웹 표준 여백 시스템 */
+  --container-padding: 16px;
+  --section-gap: 24px;
+  --card-gap: 16px;
+  --border-radius: 16px;
+  --button-height: 48px;
+  --icon-size: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg); 
+  color: var(--text);
+}
+
+.app {
+  width: 100%;
+  min-height: 100vh; 
+  background: var(--bg); 
+  display: flex; 
+  flex-direction: column;
+}
+
+/* 상단바 */
+.topbar {
+  position: sticky; 
+  top: 0; 
+  background: #fff; 
+  border-bottom: 1px solid var(--line);
+  padding: 16px var(--container-padding); 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  background: #fff;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-icon:hover {
+  background: var(--bg);
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
+
+.logo {
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  font-weight: 800; 
+  font-size: 18px; 
+  color: var(--blue);
+}
+
+.logo-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--blue-050);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.link-login {
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  color: #1f2a44; 
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.link-login:hover {
+  color: var(--blue);
+  transform: translateY(-1px);
+}
+
+.content {
+  padding: var(--section-gap) var(--container-padding) 28px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+.ribbon {
+  display: inline-block; 
+  padding: 8px 12px; 
+  border-radius: 999px; 
+  background: #eef7ff; 
+  color: #2b73ff; 
+  font-weight: 700; 
+  font-size: 12px; 
+  border: 1px solid #d6e6ff;
+  align-self: flex-start;
+}
+
+.hello {
+  display: flex; 
+  gap: 12px; 
+  margin: 12px 0 4px;
+  align-items: flex-start;
+}
+
+.hello .mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #eaf1ff;
+  display: grid;
+  place-items: center;
+  color: #2b73ff;
+  font-weight: 900;
+  font-size: 22px;
+  border: 1px solid #d8e4ff;
+  flex-shrink: 0;
+}
+
+h1 {
+  margin: 0; 
+  line-height: 1.35; 
+  font-size: 22px; 
+  font-weight: 900;
+}
+
+h1 u {
+  text-underline-offset: 6px;
+}
+
+.form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input {
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  background: #fff; 
+  border: 1px solid var(--line); 
+  border-radius: 16px; 
+  padding: 16px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+
+.input:focus-within {
+  box-shadow: var(--shadow), var(--focus); 
+  border-color: #cfe0ff;
+  transform: translateY(-1px);
+}
+
+.input input {
+  border: none; 
+  outline: none; 
+  width: 100%; 
+  background: transparent; 
+  font-size: 14px; 
+  color: var(--text);
+}
+
+.field-foot {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin: 8px 4px 14px; 
+  color: var(--muted); 
+  font-size: 12px;
+}
+
+.remember {
+  display: flex; 
+  align-items: center; 
+  gap: 8px;
+}
+
+.remember input {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.6px solid #c7cfe0;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+
+.remember input:checked {
+  background: var(--blue); 
+  border-color: var(--blue);
+}
+
+.remember input:checked::after {
+  content: ""; 
+  position: absolute; 
+  left: 4px; 
+  top: 1px; 
+  width: 6px; 
+  height: 10px; 
+  border: 2px solid #fff; 
+  border-top: none; 
+  border-left: none; 
+  transform: rotate(45deg);
+}
+
+.link {
+  color: #49618a; 
+  text-decoration: none;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.link:hover {
+  color: var(--blue);
+}
+
+.btn-primary {
+  width: 100%; 
+  border: none; 
+  border-radius: 16px; 
+  padding: 16px; 
+  background: linear-gradient(90deg, var(--blue), var(--blue-700));
+  color: #fff; 
+  font-weight: 900; 
+  font-size: 16px; 
+  cursor: pointer; 
+  box-shadow: 0 8px 24px rgba(36,107,255,.25);
+  transition: all 0.2s ease;
+  height: var(--button-height);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(36,107,255,.35);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.signup {
+  margin-top: 10px; 
+  text-align: center; 
+  color: #445; 
+  font-size: 14px;
+}
+
+.signup a {
+  color: var(--blue); 
+  font-weight: 800; 
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.signup a:hover {
+  color: var(--blue-700);
+}
+
+.illu-wrap {
+  display: grid; 
+  place-items: center; 
+  margin: 18px 0 6px;
+}
+
+.car-illu {
+  width: 210px;
+  height: 150px;
+  border-radius: 20px;
+  background: #eaf3ff;
+  border: 1px solid #d9e6ff;
+  display: grid; 
+  place-items: center; 
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+
+.car-illu:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(15,23,42,0.1);
+}
+
+.title2 {
+  font-size: 18px; 
+  font-weight: 900; 
+  margin: 18px 0 6px;
+}
+
+.desc {
+  color: #5b6b80; 
+  font-size: 13px; 
+  line-height: 1.6;
+}
+
+.list {
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+  margin-top: 12px;
+}
+
+.tile {
+  display: flex; 
+  align-items: flex-start; 
+  gap: 12px; 
+  padding: 16px; 
+  background: #fff; 
+  border: 1px solid var(--line);
+  border-radius: 16px; 
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(15,23,42,0.1);
+}
+
+.lead {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line); 
+  background: #fafbff;
+  flex-shrink: 0;
+}
+
+.lead.blue { color: var(--blue); background: #eff6ff; }
+.lead.green { color: var(--green); background: #ecfdf5; }
+.lead.purple { color: #7c3aed; background: #f5f3ff; }
+.lead.orange { color: var(--orange); background: #fff7ed; }
+
+.tile .t { font-weight: 800; }
+.tile .s { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.cta {
+  margin: 18px 0 32px; 
+  border-radius: 22px; 
+  padding: 22px; 
+  background: linear-gradient(180deg, #1f66ff, #1460ff);
+  color: #fff; 
+  text-align: center; 
+  box-shadow: 0 10px 30px rgba(36,107,255,.35);
+  transition: all 0.2s ease;
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(36,107,255,.4);
+}
+
+.cta h3 { margin: 0 0 8px; font-size: 20px; font-weight: 900; }
+.cta p { margin: 0; opacity: .95; font-size: 14px; line-height: 1.6; }
+
+.cta .cta-btn {
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px; 
+  margin-top: 16px;
+  padding: 12px 16px; 
+  background: #fff; 
+  color: #0f55ff; 
+  border-radius: 999px; 
+  font-weight: 900; 
+  border: 1px solid #eaf0ff; 
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cta .cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255,255,255,0.3);
+}
+
+.signup-btn {
+  color: var(--blue); 
+  font-weight: 800; 
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 4px;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.signup-btn:hover {
+  text-decoration: underline;
+}
+
+/* 접근성용 포커스 */
+a:focus, button:focus, input:focus {
+  outline: var(--focus);
+}
+
+/* ===== 반응형 디자인 ===== */
+@media (max-width: 480px) {
+  :root {
+    --container-padding: 16px;
+    --section-gap: 20px;
+    --card-gap: 12px;
+    --border-radius: 16px;
+    --button-height: 48px;
+    --icon-size: 24px;
+  }
+  
+  .content {
+    padding: 20px 16px 24px;
+    gap: 20px;
+  }
+  
+  .topbar {
+    padding: 16px 16px;
+  }
+  
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .hello .mark {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  h1 {
+    font-size: 20px;
+  }
+  
+  .input {
+    padding: 14px;
+  }
+  
+  .car-illu {
+    width: 180px;
+    height: 130px;
+  }
+  
+  .tile {
+    padding: 14px;
+  }
+  
+  .cta {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  :root {
+    --container-padding: 24px;
+    --section-gap: 32px;
+    --card-gap: 20px;
+    --border-radius: 20px;
+    --button-height: 56px;
+    --icon-size: 28px;
+  }
+  
+  .content {
+    padding: 32px 24px 40px;
+    gap: 32px;
+  }
+  
+  .topbar {
+    padding: 20px 24px;
+  }
+  
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .hello .mark {
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  .input {
+    padding: 18px;
+  }
+  
+  .car-illu {
+    width: 240px;
+    height: 170px;
+  }
+  
+  .tile {
+    padding: 20px;
+  }
+  
+  .cta {
+    padding: 28px;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    --container-padding: 32px;
+    --section-gap: 40px;
+    --card-gap: 24px;
+    --border-radius: 24px;
+    --button-height: 64px;
+    --icon-size: 32px;
+  }
+  
+  .content {
+    padding: 40px 32px 48px;
+    gap: 40px;
+  }
+  
+  .topbar {
+    padding: 24px 32px;
+  }
+  
+  .btn-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .hello .mark {
+    width: 56px;
+    height: 56px;
+    font-size: 26px;
+  }
+  
+  h1 {
+    font-size: 26px;
+  }
+  
+  .input {
+    padding: 20px;
+  }
+  
+  .car-illu {
+    width: 280px;
+    height: 200px;
+  }
+  
+  .tile {
+    padding: 24px;
+  }
+  
+  .cta {
+    padding: 32px;
+  }
+}

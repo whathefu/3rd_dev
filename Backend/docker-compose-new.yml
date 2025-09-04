@@ -1,0 +1,51 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    environment:
+      MARIADB_DATABASE: ai_go
+      MARIADB_USER: app_user
+      MARIADB_PASSWORD: app_pass
+      MARIADB_ROOT_PASSWORD: root_pass
+      TZ: Asia/Seoul
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - ai_go_db:/var/lib/mysql
+      - ./db_demofile/Database_ai_go.sql:/docker-entrypoint-initdb.d/01_ai_go.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb -h127.0.0.1 -u$MARIADB_USER -p$MARIADB_PASSWORD --connect-timeout=5 -e 'SELECT 1' >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      start_period: 10s
+      retries: 30
+      
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    working_dir: /code
+    volumes:
+      - ./:/code
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=발급시_사용한_secret
+      - ALGORITHM=HS256
+      - DATABASE_URL=mysql+pymysql://app_user:app_pass@mariadb:3306/ai_go?charset=utf8mb4
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=ai_go
+      - DB_USER=app_user
+      - DB_PASSWORD=app_pass
+      - CREATE_TABLE_ON_START=true
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ai_go_db:
