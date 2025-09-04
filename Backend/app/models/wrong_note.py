@@ -19,4 +19,5 @@ class WrongNote(Base):
         nullable=False,
         index=True,
     )
+    chosen_option: Mapped[str] = mapped_column(String(500), nullable=True)  # 사용자가 선택한 답안
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)

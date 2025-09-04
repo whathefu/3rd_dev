@@ -41,20 +41,20 @@ export const login = createAsyncThunk(
         throw new Error('로그인 응답이 없습니다.');
       }
 
-      // 2) 토큰 저장 (모든 가능한 응답 구조 시도)
+      // 2) 토큰 저장 (백엔드가 access_token 필드명 사용)
       let token = null;
       
-      // 구조 1: res.accessToken
-      if (res?.accessToken) {
-        token = res.accessToken;
-        console.log('토큰 발견: res.accessToken');
-      }
-      // 구조 2: res.access_token
-      else if (res?.access_token) {
+      // 백엔드 표준화: access_token 필드 사용
+      if (res?.access_token) {
         token = res.access_token;
         console.log('토큰 발견: res.access_token');
       }
-      // 구조 3: res.token
+      // 하위 호환성: accessToken
+      else if (res?.accessToken) {
+        token = res.accessToken;
+        console.log('토큰 발견: res.accessToken (legacy)');
+      }
+      // 기타
       else if (res?.token) {
         token = res.token;
         console.log('토큰 발견: res.token');

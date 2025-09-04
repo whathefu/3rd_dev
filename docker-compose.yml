@@ -13,7 +13,7 @@ services:
       - "3307:3306"
     volumes:
       - ai_go_db:/var/lib/mysql
-      - ./db_demofile/Database_ai_go.sql:/docker-entrypoint-initdb.d/01_ai_go.sql:ro
+      - ./Backend/db_demofile/Database_ai_go.sql:/docker-entrypoint-initdb.d/01_ai_go.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mariadb -h127.0.0.1 -u$MARIADB_USER -p$MARIADB_PASSWORD --connect-timeout=5 -e 'SELECT 1' >/dev/null 2>&1 || exit 1"]
       interval: 5s
@@ -24,16 +24,16 @@ services:
 
   api:
     build:
-      context: .
+      context: ./Backend
       dockerfile: docker/Dockerfile.dev
     working_dir: /code
     volumes:
-      - ./:/code
+      - ./Backend:/code
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8080:8000"
     environment:
-      - SECRET_KEY=발급시_사용한_secret
+      - SECRET_KEY=ai-go-secret-key-2025
       - ALGORITHM=HS256
       - DATABASE_URL=mysql+pymysql://app_user:app_pass@mariadb:3306/ai_go?charset=utf8mb4
       - DB_HOST=mariadb
@@ -42,9 +42,35 @@ services:
       - DB_USER=app_user
       - DB_PASSWORD=app_pass
       - CREATE_TABLE_ON_START=true
+      - ALLOWED_ORIGINS=http://localhost:3005,http://127.0.0.1:3005,http://localhost:8080,http://127.0.0.1:8080
+      - VIDEO_URL_WHITELIST=youtube.com,youtu.be,vimeo.com,drive.google.com,s3.amazonaws.com,cloudfront.net
     depends_on:
       mariadb:
         condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile_inline: |
+        FROM node:18-alpine
+        WORKDIR /app
+        COPY package*.json ./
+        RUN npm ci --only=production
+        COPY . .
+        EXPOSE 3005
+        CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    ports:
+      - "3005:3005"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+      - NODE_ENV=development
+      - VITE_NODE_ENV=development
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
     restart: unless-stopped
 
 volumes:

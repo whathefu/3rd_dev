@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
 import { getStats } from '../api/health';
+import { getVideos, getMyAnalytics } from '../services/api';
+import VideoPlayer from '../components/VideoPlayer';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -29,6 +31,11 @@ const HomePage = () => {
     studyHours: 0
   });
 
+  // 비디오 목록 상태
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videoLoading, setVideoLoading] = useState(false);
+
   // 기존 주간 진행도 더미
   const weeklyProgress = [
     { day: '월', status: 'done' },
@@ -44,6 +51,7 @@ const HomePage = () => {
   useEffect(() => {
     (async () => {
       try {
+        // 통계 정보 가져오기
         const data = await getStats(); // {quizzes, accuracy, streakDays, studyHours}
         setStats(prev => ({
           ...prev,
@@ -56,8 +64,36 @@ const HomePage = () => {
         console.error("Failed to fetch stats", e);
         // 실패 시 기본값 유지 (0)
       }
+
+      try {
+        // 사용자 분석 정보로 통계 업데이트
+        if (user) {
+          const analytics = await getMyAnalytics();
+          setStats(prev => ({
+            ...prev,
+            quizzes: analytics.total || prev.quizzes,
+            accuracy: analytics.accuracy || prev.accuracy,
+          }));
+        }
+      } catch (e) {
+        console.error("Failed to fetch user analytics", e);
+      }
+
+      try {
+        // 비디오 목록 가져오기
+        setVideoLoading(true);
+        const videoList = await getVideos({ limit: 6 }); // 최신 6개
+        setVideos(videoList || []);
+        if (videoList && videoList.length > 0) {
+          setSelectedVideo(videoList[0]); // 첫 번째 비디오를 기본 선택
+        }
+      } catch (e) {
+        console.error("Failed to fetch videos", e);
+      } finally {
+        setVideoLoading(false);
+      }
     })();
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -196,6 +232,134 @@ const HomePage = () => {
             ))}
           </div>
         </div>
+
+        {/* 퀴즈 바로 시작하기 섹션 */}
+        <div className="section-title">
+          퀴즈 바로 시작하기
+          <button 
+            className="btn-start-quiz"
+            onClick={() => navigate('/quiz')}
+            style={{
+              marginLeft: 'auto',
+              padding: '8px 16px',
+              backgroundColor: '#2b73ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            퀴즈 시작 →
+          </button>
+        </div>
+
+        {/* 비디오 섹션 */}
+        {videoLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+            비디오를 불러오는 중...
+          </div>
+        ) : videos.length > 0 ? (
+          <div className="video-section">
+            {/* 선택된 비디오 재생 */}
+            {selectedVideo && (
+              <div className="main-video" style={{ marginBottom: '20px' }}>
+                <VideoPlayer video={selectedVideo} />
+              </div>
+            )}
+
+            {/* 비디오 목록 */}
+            <div className="video-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '15px',
+              marginTop: '20px'
+            }}>
+              {videos.map((video) => (
+                <div 
+                  key={video.video_id}
+                  className={`video-card ${selectedVideo?.video_id === video.video_id ? 'selected' : ''}`}
+                  onClick={() => setSelectedVideo(video)}
+                  style={{
+                    border: selectedVideo?.video_id === video.video_id ? '2px solid #2b73ff' : '1px solid #ddd',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    cursor: 'pointer',
+                    backgroundColor: selectedVideo?.video_id === video.video_id ? '#f0f7ff' : 'white',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {video.thumbnail_url && (
+                    <img 
+                      src={video.thumbnail_url} 
+                      alt={video.title}
+                      style={{
+                        width: '100%',
+                        height: '120px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        marginBottom: '8px'
+                      }}
+                    />
+                  )}
+                  <h4 style={{ 
+                    margin: '0 0 5px 0', 
+                    fontSize: '14px', 
+                    fontWeight: 'bold',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {video.title || "제목 없음"}
+                  </h4>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    color: '#666',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span>
+                      난이도: {video.difficulty === 1 ? '상' : video.difficulty === 2 ? '중' : '하'}
+                    </span>
+                    {video.duration_sec && (
+                      <span>
+                        {Math.floor(video.duration_sec / 60)}:{String(video.duration_sec % 60).padStart(2, '0')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px', 
+            color: '#666',
+            border: '2px dashed #ddd',
+            borderRadius: '8px',
+            marginTop: '20px'
+          }}>
+            <p>아직 등록된 비디오가 없습니다.</p>
+            {user && (
+              <button
+                onClick={() => navigate('/videos/create')}
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                첫 번째 비디오 등록하기
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

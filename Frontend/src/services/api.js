@@ -1,9 +1,21 @@
 // src/services/api.js
 import axios from 'axios';
 
+// 환경변수 기반 baseURL 설정
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '') + '/api/v1'; // 끝의 슬래시 제거 후 /api/v1 추가
+  }
+  // fallback
+  return 'http://localhost:8080/api/v1';
+};
+
 // 공용 axios 인스턴스 생성
 export const api = axios.create({
-  baseURL: 'http://192.168.101.210:8000/api/v1',
+  baseURL: getBaseURL(),
+  timeout: 10000,
+  withCredentials: false,
 });
 
 // 여러 저장소를 차례대로 확인해서 토큰을 찾아옵니다.
@@ -91,11 +103,16 @@ export const signup = (body) => {
 
 export const login = (body) => {
   console.log('[API] 로그인 요청 데이터:', body);
-  console.log('[API] 로그인 요청 URL:', '/users/login');
-  console.log('[API] 로그인 요청 전체 URL:', 'http://192.168.101.210:8000/api/v1/users/login');
   return api.post('/users/login', body).then(r => {
     console.log('[API] 로그인 응답 전체:', r);
     console.log('[API] 로그인 응답 데이터:', r.data);
+    
+    // 토큰 자동 저장 (백엔드 응답 필드명: access_token)
+    if (r.data.access_token) {
+      localStorage.setItem('access_token', r.data.access_token);
+      console.log('[API] 토큰 자동 저장 완료:', r.data.access_token.substring(0, 20) + '...');
+    }
+    
     return r.data;
   }).catch(error => {
     console.error('[API] 로그인 에러 상세 정보:', {
@@ -128,21 +145,57 @@ export const getQuizById = (quizId) => api.get(`/quizzes/${quizId}`).then(r => r
 export const submitAnswer = (body) => api.post('/quizzes/submit', body).then(r => r.data);
 
 /* -------------------- Wrong Notes -------------------- */
-export const getWrongNotes = () => api.get('/wrong-notes').then(r => r.data);
-export const saveWrongNote = (quizId) => api.post('/wrong-notes', null, { params: { quiz_id: quizId } }).then(r => r.data);
+export const getWrongNotes = (params = {}) => {
+  // offset, limit, level 파라미터 지원
+  return api.get('/wrong-notes', { params }).then(r => r.data);
+};
+
+export const createWrongNote = (payload) => {
+  // { question_id, chosen_option } 형태로 전송
+  return api.post('/wrong-notes', payload).then(r => r.data);
+};
+
 export const getWrongNoteById = (wrongNoteId) => api.get(`/wrong-notes/${wrongNoteId}`).then(r => r.data);
+export const getWrongNoteStats = (days = 30) => api.get('/wrong-notes/stats', { params: { days } }).then(r => r.data);
+export const deleteWrongNote = (wrongNoteId) => api.delete(`/wrong-notes/${wrongNoteId}`).then(r => r.data);
+
+// 하위 호환성을 위한 기존 함수 유지
+export const saveWrongNote = (quizId, chosenOption = "") => {
+  return createWrongNote({ question_id: quizId, chosen_option: chosenOption });
+};
 
 /* -------------------- Analytics -------------------- */
-export const getAnalyticsSummary = () => api.get('/analytics/summary').then(r => r.data);
-export const getAnalyticsWeekly = (days) => api.get('/analytics/weekly', { params: { days } }).then(r => r.data);
-export const getAnalyticsCategories = (topK) => api.get('/analytics/categories', { params: { top_k: topK } }).then(r => r.data);
+// 새로운 사용자 분석 API (스크린샷 명세 기준)
+export const getUserAnalytics = (userId, days = 30) => {
+  return api.get(`/users/${userId}/analytics`, { params: { days } }).then(r => r.data);
+};
+
+export const getMyAnalytics = (days = 30) => {
+  return api.get('/users/me/analytics', { params: { days } }).then(r => r.data);
+};
+
+// 레거시 분석 API (하위 호환성)
+export const getAnalyticsSummary = () => api.get('/users/analytics/summary').then(r => r.data);
+export const getAnalyticsWeekly = (days = 7) => api.get('/analytics/weekly', { params: { days } }).then(r => r.data);
+export const getAnalyticsCategories = (topK = 8) => api.get('/analytics/categories', { params: { top_k: topK } }).then(r => r.data);
 
 /* default export */
 const apiService = {
+  // Authentication
   signup, login, me, logout,
+  
+  // Video Management
   createVideo, getVideos, getVideoById,
+  
+  // Quiz
   getQuizzesByVideo, getQuizById, submitAnswer,
-  getWrongNotes, saveWrongNote, getWrongNoteById,
+  
+  // Wrong Notes
+  getWrongNotes, createWrongNote, saveWrongNote, getWrongNoteById, 
+  getWrongNoteStats, deleteWrongNote,
+  
+  // Analytics
+  getUserAnalytics, getMyAnalytics,
   getAnalyticsSummary, getAnalyticsWeekly, getAnalyticsCategories,
 };
 

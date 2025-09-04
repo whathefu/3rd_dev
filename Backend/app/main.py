@@ -6,6 +6,7 @@ from fastapi.exceptions import HTTPException as FastAPIHTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import time
+import os
 from collections import deque
 from datetime import datetime
 
@@ -23,7 +24,11 @@ async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
     headers = getattr(exc, "headers", None) or {}
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail},
+        content={
+            "code": exc.status_code,
+            "message": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
+            "detail": getattr(exc, "detail", None)
+        },
         headers=headers,
     )
 
@@ -35,21 +40,17 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-origins = [
-    "http://localhost:3005",
-    "http://127.0.0.1:3005",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    # 필요 시 사내/LAN IP 추가
-]
+# CORS 설정: 환경변수 또는 기본값
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3005,http://127.0.0.1:3005,http://localhost:8080,http://127.0.0.1:8080")
+origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["*"],
+    expose_headers=["Authorization", "Content-Type", "X-Total-Count"],
     max_age=600,
 )
 
@@ -108,6 +109,7 @@ app.include_router(health_router.router, prefix="/api/v1")
 app.include_router(user_router.router,   prefix="/api/v1")
 app.include_router(quiz_router.router,   prefix="/api/v1")
 app.include_router(wrong_note.router,    prefix="/api/v1")
-app.include_router(analytics.router,     prefix="/api/v1")
+app.include_router(analytics.router,     prefix="/api/v1")  # User analytics (new)
+app.include_router(analytics.analytics_router, prefix="/api/v1")  # Legacy analytics
 app.include_router(video_router.router,  prefix="/api/v1")
 # app.include_router(inference_router.router, prefix="/api/v1")  # 필요 시 활성화

@@ -25,7 +25,8 @@ class LoginIn(BaseModel):
     password: str
 
 class TokenOut(BaseModel):
-    accessToken: str
+    access_token: str
+    token_type: str = "bearer"
 
 class UserOut(BaseModel):
     user_id: str
@@ -80,7 +81,7 @@ def login(payload: LoginIn, db: Session = Depends(get_db)):
 
     # ✅ sub은 반드시 users.user_id(UUID)
     token = create_access_token(sub=user.user_id)
-    return {"accessToken": token}
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @router.get("/me", response_model=UserOut)
